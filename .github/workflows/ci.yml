@@ -18,12 +18,12 @@ jobs:
         php: ["8.3", "8.4", "8.5"]
 
     steps:
-      - uses: actions/checkout@v4
-
       - name: Install build tools
         run: |
           apt-get update
           apt-get install -y --no-install-recommends autoconf g++ gcc git libc-dev make pkg-config re2c
+
+      - uses: actions/checkout@v4
 
       - name: Validate package metadata
         run: |

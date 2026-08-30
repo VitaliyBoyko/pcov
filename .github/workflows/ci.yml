@@ -27,7 +27,7 @@ jobs:
 
       - name: Validate package metadata
         run: |
-          php -r '$json = json_decode(file_get_contents("composer.json"), true, flags: JSON_THROW_ON_ERROR); assert($json["type"] === "php-ext");'
+          php -r "\$json = json_decode(file_get_contents('composer.json'), true, flags: JSON_THROW_ON_ERROR); assert(\$json['type'] === 'php-ext');"
 
       - name: Configure and build with strict warnings
         run: |

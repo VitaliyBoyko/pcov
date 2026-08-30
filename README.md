@@ -31,18 +31,15 @@ across an entire suite, not for a standalone request report.
 Release 2.0 supports Linux, NTS PHP 8.3, 8.4, and 8.5. It uses the extension
 name `pcov`, so it replaces and cannot be loaded beside official PCOV.
 
-After the package is indexed by Packagist, install with
-[PIE](https://github.com/php/pie), the PHP extension installer:
+Install with [PIE](https://github.com/php/pie), the PHP extension installer:
 
 ```sh
 pie install vitaliyboyko/pcov
 ```
 
-Until that registry listing is available, or to build from source directly:
+Or build from source:
 
 ```sh
-git clone --branch v2.0.0 https://github.com/VitaliyBoyko/pcov.git
-cd pcov
 phpize
 ./configure --enable-pcov
 make -j"$(getconf _NPROCESSORS_ONLN)"

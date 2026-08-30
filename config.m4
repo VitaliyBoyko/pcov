@@ -7,29 +7,19 @@ PHP_ARG_ENABLE(pcov, whether to enable php coverage support,
 if test "$PHP_PCOV" != "no"; then
   PHP_VERSION=$($PHP_CONFIG --vernum)
 
+  AC_CHECK_FUNCS([clock_gettime getrusage])
+  if test "$ac_cv_func_clock_gettime" = "yes" -a \
+          "$ac_cv_func_getrusage" = "yes"; then
+    AC_DEFINE([HAVE_PCOV_NATIVE_EXPORT], [1],
+      [Define to 1 when synchronous native export is supported])
+  fi
+
   AC_MSG_CHECKING(PHP version)
 
-  if test $PHP_VERSION -gt 80099; then
-    PHP_NEW_EXTENSION(pcov, pcov.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -std=c99)
-  else
-      if test $PHP_VERSION -lt 70100; then
-        AC_MSG_ERROR([pcov supports PHP 7.1+])
-      elif test $PHP_VERSION -lt 70200; then
-        AC_MSG_RESULT(7.1)
-        PHP_PCOV_CFG_VERSION=701
-      elif test $PHP_VERSION -lt 70300; then
-        AC_MSG_RESULT(7.2)
-        PHP_PCOV_CFG_VERSION=702
-      elif test $PHP_VERSION -lt 70400; then
-        AC_MSG_RESULT(7.3)
-        PHP_PCOV_CFG_VERSION=703
-      else
-        AC_MSG_RESULT(7.4+)
-        PHP_PCOV_CFG_VERSION=704
-      fi
-      
-    PHP_NEW_EXTENSION(pcov, pcov.c cfg/$PHP_PCOV_CFG_VERSION/zend_cfg.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
-    PHP_ADD_BUILD_DIR($ext_builddir/cfg/$PHP_PCOV_CFG_VERSION, 1)
-    PHP_ADD_INCLUDE($ext_srcdir/cfg/$PHP_PCOV_CFG_VERSION)
+  if test $PHP_VERSION -lt 80300 -o $PHP_VERSION -ge 80600; then
+    AC_MSG_ERROR([this PCOV release supports PHP 8.3, 8.4, and 8.5])
   fi
+
+  AC_MSG_RESULT($PHP_VERSION)
+  PHP_NEW_EXTENSION(pcov, pcov.c pcov_dump.c pcov_fingerprint.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -std=c99)
 fi

@@ -1,6 +1,7 @@
 # Object files
 *.o
 *.lo
+*.dep
 
 # Libraries
 *.lib
@@ -53,3 +54,5 @@ run-tests.log
 tmp-php.ini
 
 /vendor/
+.idea
+benchmark/results/

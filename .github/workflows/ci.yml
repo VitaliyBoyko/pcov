@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  linux-nts:
+    name: PHP ${{ matrix.php }} NTS
+    runs-on: ubuntu-latest
+    container: php:${{ matrix.php }}-cli
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ["8.3", "8.4", "8.5"]
+
+    steps:
+      - name: Install build tools
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends autoconf g++ gcc git libc-dev make pkg-config re2c
+
+      - uses: actions/checkout@v4
+
+      - name: Check whitespace
+        run: |
+          if find . -path './.git' -prune -o -type f -print0 | xargs -0 -r grep -IEn '[[:blank:]]+$'; then
+            echo 'Trailing whitespace found' >&2
+            exit 1
+          fi
+
+      - name: Validate package metadata
+        run: |
+          php -r "\$json = json_decode(file_get_contents('composer.json'), true, flags: JSON_THROW_ON_ERROR); assert(\$json['type'] === 'php-ext');"
+
+      - name: Configure and build with strict warnings
+        run: |
+          phpize
+          CFLAGS="-O2 -Wall -Wextra -Werror" ./configure --enable-pcov
+          make -j"$(nproc)"
+
+      - name: Run PHPT suite
+        run: NO_INTERACTION=1 REPORT_EXIT_STATUS=1 make test
+
+      - name: Check PHP and shell syntax
+        run: |
+          find tools benchmark -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+          find benchmark -type f -name '*.sh' -print0 | xargs -0 -r -n1 bash -n

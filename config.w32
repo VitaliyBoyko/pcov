@@ -9,8 +9,8 @@ if (PHP_PCOV != "no") {
 	}
 
 	if (PHP_VERSION > 8 || PHP_VERSION == 8 && PHP_MINOR_VERSION >= 1) {
-		EXTENSION("pcov", "pcov.c", PHP_PCOV_SHARED, 
-		"/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");	
+		EXTENSION("pcov", "pcov.c pcov_dump.c pcov_fingerprint.c", PHP_PCOV_SHARED,
+		"/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 	} else {
 		var cfg_dir;
 
@@ -20,12 +20,12 @@ if (PHP_PCOV != "no") {
 			cfg_dir = "704";
 		}
 
-		EXTENSION("pcov", "pcov.c", PHP_PCOV_SHARED, 
-			"/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 /I" + 
+		EXTENSION("pcov", "pcov.c pcov_dump.c pcov_fingerprint.c", PHP_PCOV_SHARED,
+			"/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 /I" +
 				configure_module_dirname + "/cfg/" +  cfg_dir);
 		ADD_SOURCES(
 			configure_module_dirname + "/cfg/" + cfg_dir,
-			"zend_cfg.c", 
+			"zend_cfg.c",
 			"pcov"
 		);
 	}

@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
-   
+
    This source file has been adapted for pcov so that the CFG from O+ is standalone
 */
 

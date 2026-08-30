@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "workload": "representative large PHP e-commerce E2E workload",
+  "php": "8.3.31 NTS",
+  "official_pcov": "1.0.12",
+  "fork": "2.0.0",
+  "cypress_runners": 1,
+  "fpm_children": 1,
+  "tests_per_round": 20,
+  "navigations_per_round": 120,
+  "accepted_rounds_per_mode": 3,
+  "scenario_p95_method": "nearest-rank observed maximum",
+  "official": {
+    "cypress_wall_seconds": {"median": 316.245, "p95": 317.229},
+    "finalized_wall_seconds": {"median": 316.766, "p95": 317.717},
+    "fpm_cpu_seconds": {"median": 208.433, "p95": 210.015},
+    "request_export_milliseconds": {"median": 519.1, "p95": 1090.6},
+    "merge_seconds_median": 0.489,
+    "peak_cgroup_bytes_median": 416358400,
+    "minor_faults_median": 1036936,
+    "output_bytes_median": 59335207
+  },
+  "large_codebase": {
+    "cypress_wall_seconds": {"median": 234.870, "p95": 236.068},
+    "finalized_wall_seconds": {"median": 236.125, "p95": 237.366},
+    "fpm_cpu_seconds": {"median": 112.699, "p95": 115.070},
+    "request_export_milliseconds": {"median": 1.85, "p95": 2.95},
+    "merge_seconds_median": 1.255,
+    "peak_cgroup_bytes_median": 325193728,
+    "minor_faults_median": 819762,
+    "output_bytes_median": 3102120,
+    "validated_hit_records": 435,
+    "full_fallbacks": 0
+  },
+  "coverage": {
+    "files": 208,
+    "executable_lines": 4341,
+    "normalized_sha256": "6b1280edc9ecddd14657907a43b0cbed63bebb69dba81b280931c5c43d3c2903"
+  }
+}

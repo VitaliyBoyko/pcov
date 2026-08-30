@@ -25,6 +25,13 @@ jobs:
 
       - uses: actions/checkout@v4
 
+      - name: Check whitespace
+        run: |
+          if find . -path './.git' -prune -o -type f -print0 | xargs -0 -r grep -IEn '[[:blank:]]+$'; then
+            echo 'Trailing whitespace found' >&2
+            exit 1
+          fi
+
       - name: Validate package metadata
         run: |
           php -r "\$json = json_decode(file_get_contents('composer.json'), true, flags: JSON_THROW_ON_ERROR); assert(\$json['type'] === 'php-ext');"
@@ -42,6 +49,3 @@ jobs:
         run: |
           find tools benchmark -type f -name '*.php' -print0 | xargs -0 -n1 php -l
           find benchmark -type f -name '*.sh' -print0 | xargs -0 -r -n1 bash -n
-
-      - name: Check whitespace
-        run: git diff --check

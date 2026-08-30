@@ -1045,7 +1045,7 @@ PHP_NAMED_FUNCTION(php_pcov_waiting)
 	zend_string *waiting;
 
 	if (zend_parse_parameters_none() != SUCCESS) {
-		return;	
+		return;
 	}
 
 	PHP_PCOV_API_ENABLED_GUARD();

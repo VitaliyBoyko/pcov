@@ -23,7 +23,7 @@ jobs:
       - name: Install build tools
         run: |
           apt-get update
-          apt-get install -y --no-install-recommends autoconf g++ gcc libc-dev make pkg-config re2c
+          apt-get install -y --no-install-recommends autoconf g++ gcc git libc-dev make pkg-config re2c
 
       - name: Validate package metadata
         run: |

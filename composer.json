@@ -1,13 +1,25 @@
 {
-    "name": "pecl/pcov",
+    "name": "vitaliyboyko/pcov",
     "type": "php-ext",
     "license": "PHP-3.01",
-    "description": "PCOV - CodeCoverage compatible driver for PHP",
+    "description": "PCOV coverage driver optimized for large PHP test suites",
+    "keywords": ["coverage", "phpunit", "pcov", "testing"],
+    "homepage": "https://github.com/VitaliyBoyko/pcov",
+    "support": {
+        "issues": "https://github.com/VitaliyBoyko/pcov/issues",
+        "source": "https://github.com/VitaliyBoyko/pcov"
+    },
     "require": {
-        "php": ">= 7.1.0"
+        "php": ">=8.3 <8.6"
+    },
+    "conflict": {
+        "pecl/pcov": "*"
     },
     "php-ext": {
         "extension-name": "pcov",
+        "support-zts": false,
+        "support-nts": true,
+        "os-families": ["linux"],
         "configure-options": [
             {
                 "name": "enable-pcov",

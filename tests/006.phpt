@@ -15,6 +15,7 @@ phpinfo(INFO_MODULES);
 PCOV support => Disabled
 PCOV version => %s
 pcov.large_codebase => enabled
+pcov.request_magento_cache => disabled
 pcov.directory => auto
 pcov.exclude => none
 pcov.initial.memory => 65336 bytes

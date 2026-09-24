@@ -21,7 +21,7 @@
 extern zend_module_entry pcov_module_entry;
 #define phpext_pcov_ptr &pcov_module_entry
 
-#define PHP_PCOV_VERSION "2.0.0"
+#define PHP_PCOV_VERSION "2.1.0"
 
 #ifdef PHP_WIN32
 #	define PHP_PCOV_API __declspec(dllexport)
@@ -160,6 +160,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pcov)
 	struct {
 		zend_bool enabled;
 		zend_bool large_codebase;
+		zend_bool request_magento_cache;
 		zend_long memory;
 		zend_long files;
 		char     *directory;

@@ -28,7 +28,7 @@ across an entire suite, not for a standalone request report.
 
 ## Requirements and installation
 
-Release 2.0 supports Linux, NTS PHP 8.3, 8.4, and 8.5. It uses the extension
+Release 2.1.0 supports Linux, NTS PHP 8.3, 8.4, and 8.5. It uses the extension
 name `pcov`, so it replaces and cannot be loaded beside official PCOV.
 
 Install with [PIE](https://github.com/php/pie), the PHP extension installer:
@@ -56,7 +56,7 @@ pcov.large_codebase=1
 pcov.directory=/path/to/project
 ```
 
-`pcov.large_codebase` is the single feature switch and defaults to `1`. Set it
+`pcov.large_codebase` controls manifest export and defaults to `1`. Set it
 to `0` to retain upstream collection behavior without compile fingerprints or
 native export. Application sources must be immutable during a request and an
 OPcache generation must not mix deployments; use atomic deployment paths and
@@ -275,3 +275,44 @@ to complete discovery.
   files no request loaded and files removed between deployments.
 - This release supports Linux NTS only. Export is synchronous and all mutable
   coverage state remains process-local.
+
+## Optional Magento GET request cache
+
+`pcov.request_magento_cache=0` is **disabled by default**. Set it to `1` and use
+[MagentoRequestCache](tools/pcov_request_magento_cache.php) around your request:
+
+```php
+require '/path/to/pcov/tools/pcov_request_magento_cache.php';
+$cache = new pcov\MagentoRequestCache($recordsDir, $manifest, $deploymentId, $suiteId);
+$cache->start(); // Before Magento; the application always executes.
+register_shutdown_function(static function () use ($cache): void { $cache->finish(); });
+```
+
+Repeated cacheable GETs reuse the first coverage record, keyed by URL, headers,
+`X-Magento-Vary`, store and deployment/suite. **Changed source fingerprints bypass
+cache**: every manifest source is SHA-256 checked, including unchanged size/mtime.
+Private/no-cache/no-store responses and checkout/admin/API routes bypass caching.
+
+**Pros:** less recording/export CPU and storage. **Cons:** hashing adds I/O;
+hidden application-state changes can hide coverage. Call `$cache->invalidate()`
+after relevant state/cache resets. Use an existing writable records directory,
+a unique suite ID, and retain records until merging. Sources must stay immutable;
+new files require an updated deployment/manifest. The flag requires this helper.
+
+### Benchmark
+
+Real Magento 2.4.8-p5 / PHP 8.4.22, `app/code`, six routes × five repetitions;
+median of three rounds:
+
+| Experiment | Wall / 30 GETs | PHP CPU | Records |
+|---|---:|---:|---:|
+| Prototype: collect all | 20.823 s | 13.650 s | 30 |
+| Prototype: skip repeats | 17.676 s | 11.362 s | 6 |
+| Implemented option: off | 24.787 s | 17.486 s | 30 |
+| Implemented option: on | 22.825 s | 15.093 s | 30 |
+
+The prototype saved **15.1% wall, 16.8% CPU and 80% records**, without the new
+HTTP/fingerprint guards. The implemented option had **zero hits** because all
+routes returned `no-cache, no-store`; its timing difference is not a proven cache
+gain. Aggregate coverage matched, but a Magento cache reset added 115 covered
+lines to an identical GET: invalidation matters.

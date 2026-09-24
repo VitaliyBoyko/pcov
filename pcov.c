@@ -130,6 +130,10 @@ PHP_INI_BEGIN()
 		"pcov.large_codebase", "1",
 		PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdateBool,
 		ini.large_codebase, zend_pcov_globals, pcov_globals)
+	STD_PHP_INI_BOOLEAN(
+		"pcov.request_magento_cache", "0",
+		PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdateBool,
+		ini.request_magento_cache, zend_pcov_globals, pcov_globals)
 	STD_PHP_INI_ENTRY  (
 		"pcov.directory", "",
 		PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdateString,
@@ -610,6 +614,9 @@ PHP_MINFO_FUNCTION(pcov)
 	php_info_print_table_row(2,
 		"pcov.large_codebase",
 		INI_BOOL("pcov.large_codebase") ? "enabled" : "disabled");
+	php_info_print_table_row(2,
+		"pcov.request_magento_cache",
+		INI_BOOL("pcov.request_magento_cache") ? "enabled" : "disabled");
 	php_info_print_table_row(2,
 		"pcov.directory",
 		directory && *directory ? directory : (PCG(directory) ? ZSTR_VAL(PCG(directory)) : "auto"));

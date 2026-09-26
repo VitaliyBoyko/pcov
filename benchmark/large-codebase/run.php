@@ -116,6 +116,7 @@ for ($round = 0; $round < $rounds; $round++) {
             $paths[] = $path;
         }
 
+        $mergeCpuStarted = getrusage();
         $mergeStarted = hrtime(true);
         if ($mode === 'official') {
             $coverage = [];
@@ -138,6 +139,12 @@ for ($round = 0; $round < $rounds; $round++) {
             $coverage = $merged['coverage'];
         }
         $mergeNs = hrtime(true) - $mergeStarted;
+        $mergeCpuEnded = getrusage();
+        $mergeCpuUs = 0;
+        foreach (['utime', 'stime'] as $kind) {
+            $mergeCpuUs += ($mergeCpuEnded["ru_{$kind}.tv_sec"] - $mergeCpuStarted["ru_{$kind}.tv_sec"]) * 1000000
+                + $mergeCpuEnded["ru_{$kind}.tv_usec"] - $mergeCpuStarted["ru_{$kind}.tv_usec"];
+        }
         $result = [
             'round' => $round,
             'mode' => $mode,
@@ -149,7 +156,8 @@ for ($round = 0; $round < $rounds; $round++) {
             'wall_ns' => array_sum(array_column($rows, 'wall_ns')) + $mergeNs,
             'export_ns' => array_sum(array_column($rows, 'export_ns')),
             'merge_ns' => $mergeNs,
-            'cpu_us' => array_sum(array_column($rows, 'cpu_us')),
+            'cpu_us' => array_sum(array_column($rows, 'cpu_us')) + $mergeCpuUs,
+            'merge_cpu_us' => $mergeCpuUs,
             'minor_faults' => array_sum(array_column($rows, 'minor_faults')),
             'major_faults' => array_sum(array_column($rows, 'major_faults')),
             'max_rss_kb' => max(array_column($rows, 'max_rss_kb')),

@@ -131,7 +131,7 @@ function pcov_record_load(string $path): array
             $previousFile = $file;
         };
         $readLines = static function (bool $values, string $lineFile) use (
-            $readU32, $size, $path, $recordType, &$offset
+            $read, $readU32, $size, $path, $recordType, &$offset
         ): array {
             $lineCount = $readU32();
             $width = $values ? 8 : 4;
@@ -141,8 +141,10 @@ function pcov_record_load(string $path): array
             }
             $lines = [];
             $previousLine = null;
+            $words = $lineCount === 0 ? [] : unpack('N*', $read($lineCount * $width));
+            $wordIndex = 1;
             for ($lineIndex = 0; $lineIndex < $lineCount; $lineIndex++) {
-                $line = $readU32();
+                $line = $words[$wordIndex++];
                 if ($line === 0 || ($previousLine !== null && $line <= $previousLine)) {
                     throw new RuntimeException(
                         "Unsorted or duplicate line {$line} after " .
@@ -151,7 +153,7 @@ function pcov_record_load(string $path): array
                 }
                 $previousLine = $line;
                 if ($values) {
-                    $raw = $readU32();
+                    $raw = $words[$wordIndex++];
                     $value = $raw === 0xffffffff ? -1 : $raw;
                     if ($value !== -1 && $value !== 1) {
                         throw new RuntimeException("Invalid coverage value in PCOV coverage record: {$path}");

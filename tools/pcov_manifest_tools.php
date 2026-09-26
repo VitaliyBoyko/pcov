@@ -377,7 +377,7 @@ function pcov_manifest_merge(string $manifestPath, array $dumpPaths): array
     $fallbacks = 0;
     $hitDumps = 0;
     $hitEntries = 0;
-    $uniqueHits = [];
+    $uniqueHits = 0;
     $deltaFiles = [];
     foreach ($dumpPaths as $dumpPath) {
         $dump = pcov_record_load($dumpPath);
@@ -410,9 +410,11 @@ function pcov_manifest_merge(string $manifestPath, array $dumpPaths): array
                 }
                 foreach ($lines as $line => $_value) {
                     $hitEntries++;
-                    $uniqueHits[pack('N', strlen($file)) . $file . pack('N', $line)] = true;
                     if (!isset($coverage[$file]) || !array_key_exists($line, $coverage[$file])) {
                         throw new RuntimeException("Hit is absent from PCOV manifest: {$file}:{$line}");
+                    }
+                    if ($coverage[$file][$line] !== 1) {
+                        $uniqueHits++;
                     }
                     $coverage[$file][$line] = 1;
                 }
@@ -436,7 +438,9 @@ function pcov_manifest_merge(string $manifestPath, array $dumpPaths): array
             foreach ($lines as $line => $value) {
                 if ($value === 1) {
                     $hitEntries++;
-                    $uniqueHits[pack('N', strlen($file)) . $file . pack('N', $line)] = true;
+                    if (($coverage[$file][$line] ?? -1) !== 1) {
+                        $uniqueHits++;
+                    }
                 }
                 if (!isset($coverage[$file][$line]) || $value === 1) {
                     $coverage[$file][$line] = $value;
@@ -468,7 +472,7 @@ function pcov_manifest_merge(string $manifestPath, array $dumpPaths): array
             'merge_ns' => hrtime(true) - $started,
             'hit_dumps' => $hitDumps,
             'hit_entries_before_deduplication' => $hitEntries,
-            'hit_entries_after_deduplication' => count($uniqueHits),
+            'hit_entries_after_deduplication' => $uniqueHits,
             'full_fallbacks' => $fallbacks,
             'delta_files' => count($deltaFiles),
         ],

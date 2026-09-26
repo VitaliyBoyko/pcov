@@ -14,6 +14,7 @@
 #include "Zend/zend_smart_str.h"
 #include "Zend/zend_exceptions.h"
 #include "ext/pcre/php_pcre.h"
+#include "ext/standard/crc32.h"
 
 #include "php_pcov.h"
 #include "pcov_fingerprint.h"
@@ -164,21 +165,8 @@ static void php_pcov_dump_append_u64(smart_str *buffer, uint64_t value) { /* {{{
 } /* }}} */
 
 static uint32_t php_pcov_dump_checksum(const char *data, size_t length) { /* {{{ */
-	uint32_t checksum = UINT32_MAX;
-	size_t index;
-
-	for (index = 0; index < length; index++) {
-		uint32_t byte = (uint8_t) data[index];
-		int bit;
-
-		checksum ^= byte;
-		for (bit = 0; bit < 8; bit++) {
-			uint32_t mask = (uint32_t) -(int32_t) (checksum & 1U);
-			checksum = (checksum >> 1) ^ (0xedb88320U & mask);
-		}
-	}
-
-	return ~checksum;
+	return php_crc32_bulk_end(php_crc32_bulk_update(
+		php_crc32_bulk_init(), data, length));
 } /* }}} */
 
 static uint32_t php_pcov_dump_read_u32(const unsigned char *bytes) { /* {{{ */

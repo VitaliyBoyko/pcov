@@ -41,6 +41,9 @@ the canonical path and strong stat identity still match. Otherwise it performs
 an open/fstat/read/fstat/path-stat hash. New files, content changes, atomic
 replacement, deletion, unreadable input, and detected races fail closed.
 
+SHA-256 uses PHP's hash implementation; record CRC-32 uses PHP's bulk checksum
+routine. Source identity checks and the binary format are unchanged.
+
 Loaded files without positive hits are validated too. A positive-hit-only
 inventory would miss new but unexecuted code.
 

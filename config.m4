@@ -21,5 +21,6 @@ if test "$PHP_PCOV" != "no"; then
   fi
 
   AC_MSG_RESULT($PHP_VERSION)
+  PHP_ADD_EXTENSION_DEP(pcov, hash)
   PHP_NEW_EXTENSION(pcov, pcov.c pcov_dump.c pcov_fingerprint.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -std=c99)
 fi

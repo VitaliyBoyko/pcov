@@ -193,41 +193,41 @@ Coverage records use a fixed-width, big-endian, checksummed format (version 1)
 with strict bounds checking. Records are intentionally tied to an exact
 `PHP_VERSION_ID`; regenerate manifests when changing PHP or PCOV versions.
 
-## Official PCOV comparison — 2.1.1
+## Benchmarks — 2.1.1
 
-### Magento GET workload
+### Magento
 
-Magento 2.4.8 / PHP 8.3.31, two routes × 15 repetitions, three rotating rounds
-per mode; medians below. Wall time includes HTTP requests and coverage merge.
-Sources, OPcache and Magento settings are shared; manifest bootstrap is excluded.
+Magento 2.4.8 / PHP 8.3.31, 30 GETs across two routes; median of three rotating
+rounds. Total time includes requests and coverage merge; export is part of it.
 
-| Mode | Wall + merge | Export / 30 GETs | Output |
+| Extension / setting | Total time | Export time | Output |
 |---|---:|---:|---:|
-| Official PCOV 1.0.12 | 9.477 s | 5.621 s | 11.56 MB |
-| PCOV 2.1.1, cache off | 4.893 s | 0.251 s | 7.70 MB |
-| PCOV 2.1.1, cache on | 4.796 s | 0.199 s | 7.70 MB |
+| Official PCOV 1.0.12 | 9.113 s | 5.302 s | 11.56 MB |
+| PCOV 2.1.1, cache off | 4.553 s | 0.131 s | 7.70 MB |
+| PCOV 2.1.1, cache on | 4.473 s | 0.120 s | 7.70 MB |
 
-The new cache reused 24/30 records per round, reducing export time by **20.7%**
-and wall + merge by **2.0%** versus 2.1.1 with the flag off. All nine rounds
-produced identical coverage: 1,434 files and 42,145 executable lines. These are
-workload-specific observations from three rounds, not a general speed guarantee.
-[Measurements](benchmark/measurements/2.1.1-magento.json) ·
-[Magento benchmark runner](benchmark/magento/run.py).
+**2.1.1 with cache on reduced total time by 50.9% versus official PCOV.**
+Compared with the same 2.1.1 build with cache off, enabling the cache reduced
+export time by 8.7% and total time by 1.7%, reusing 24/30 records per round.
+All nine rounds produced identical coverage: 1,434 files and 42,145 executable
+lines. [Measurements](benchmark/measurements/2.1.1-magento.json).
 
-### Reproducible synthetic workload
+### Synthetic CLI
 
-PHP 8.5.11, 1,500 files, 64,500 executable lines, ten requests and ten rotating
-rounds. CLI requests do not use the Magento cache.
+PHP 8.5.11, 1,500 files, 64,500 executable lines, ten requests per round and ten
+rotating rounds. The GET cache is inactive in CLI. Total time and CPU include merge.
 
-| Mode | Wall median / p95 | CPU median / p95 | Export median | Output |
+| Extension | Total median / p95 | CPU median / p95 | Export median | Output |
 |---|---:|---:|---:|---:|
-| Official PCOV 1.0.12 | 0.856 / 0.876 s | 0.849 / 0.869 s | 143.9 ms | 694,580 B |
-| PCOV 2.1.1 | 0.943 / 1.000 s | 0.895 / 0.951 s | 44.3 ms | 517,240 B |
+| Official PCOV 1.0.12 | 0.854 / 0.886 s | 0.854 / 0.885 s | 142.8 ms | 694,580 B |
+| PCOV 2.1.1 | 0.775 / 0.806 s | 0.775 / 0.805 s | 11.9 ms | 517,240 B |
 
-Coverage matched in all 20 runs. Native export was faster and smaller, but
-finalized wall time was **10.2% higher** on this short workload.
-[Summary](benchmark/measurements/2.1.1-synthetic-summary.json) ·
-[Raw rounds](benchmark/measurements/2.1.1-synthetic.jsonl).
+**2.1.1 reduced total time by 9.2% and export time by 91.7% versus official PCOV.**
+Coverage matched in all 20 runs. [Summary](benchmark/measurements/2.1.1-synthetic-summary.json)
+· [Raw rounds](benchmark/measurements/2.1.1-synthetic.jsonl).
+
+PCOV 2.1.1 uses an existing manifest in both benchmarks; initial manifest
+bootstrap is excluded.
 
 ```sh
 benchmark/large-codebase/run.sh
@@ -253,7 +253,8 @@ python3 benchmark/magento/run.py /path/to/visual-demo
 
 ## Native Magento GET coverage cache (2.1.1)
 
-Enable native coverage reuse with:
+Adds native GET coverage reuse and optimizes source hashing, checksums, and merging.
+Enable the cache with:
 
 ```ini
 pcov.request_magento_cache=1

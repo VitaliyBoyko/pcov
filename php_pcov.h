@@ -21,7 +21,7 @@
 extern zend_module_entry pcov_module_entry;
 #define phpext_pcov_ptr &pcov_module_entry
 
-#define PHP_PCOV_VERSION "2.1.0"
+#define PHP_PCOV_VERSION "2.1.1"
 
 #ifdef PHP_WIN32
 #	define PHP_PCOV_API __declspec(dllexport)
@@ -109,6 +109,8 @@ struct _php_pcov_dump_stats_t {
 	uint64_t hit_array_allocations;
 	uint64_t hit_array_allocated_bytes;
 	uint64_t temporary_logical_peak_bytes;
+	uint64_t request_cache_ns;
+	uint32_t request_cache_status; /* 0 bypass, 1 miss, 2 hit */
 	uint64_t export_ns;
 	uint64_t fingerprint_ns;
 	uint64_t validation_ns;
@@ -181,6 +183,7 @@ PHP_PCOV_API uint64_t php_pcov_dump_now(void);
 PHP_PCOV_API zend_bool php_pcov_dump_benchmark_enabled(void);
 PHP_PCOV_API bool php_pcov_api_enabled(void);
 PHP_PCOV_API void php_pcov_dump_rinit(void);
+PHP_PCOV_API void php_pcov_dump_mshutdown(void);
 
 PHP_NAMED_FUNCTION(php_pcov_export);
 PHP_NAMED_FUNCTION(php_pcov_export_stats);

@@ -28,7 +28,7 @@ across an entire suite, not for a standalone request report.
 
 ## Requirements and installation
 
-Release 2.1.0 supports Linux, NTS PHP 8.3, 8.4, and 8.5. It uses the extension
+Release 2.1.1 supports Linux, NTS PHP 8.3, 8.4, and 8.5. It uses the extension
 name `pcov`, so it replaces and cannot be loaded beside official PCOV.
 
 Install with [PIE](https://github.com/php/pie), the PHP extension installer:
@@ -193,71 +193,46 @@ Coverage records use a fixed-width, big-endian, checksummed format (version 1)
 with strict bounds checking. Records are intentionally tied to an exact
 `PHP_VERSION_ID`; regenerate manifests when changing PHP or PCOV versions.
 
-## Official PCOV comparison
+## Official PCOV comparison — 2.1.1
 
-### Representative E2E workload
+### Magento GET workload
 
-The primary comparison uses a representative large PHP e-commerce application
-under PHP 8.3.31 NTS. One Cypress runner executes 20 read-only E2E tests with
-120 cache-busted storefront navigations through a one-child PHP-FPM pool.
-Blackfire and SPX are disabled in both otherwise identical images. Three
-accepted rounds rotate mode order.
+Magento 2.4.8 / PHP 8.3.31, two routes × 15 repetitions, three rotating rounds
+per mode; medians below. Wall time includes HTTP requests and coverage merge.
+Sources, OPcache and Magento settings are shared; manifest bootstrap is excluded.
 
-Official PCOV 1.0.12 uses php-code-coverage's normal `PcovDriver`, PHP object
-writer, and one atomic request file. Large-codebase PCOV 2.0 uses the identical
-file filter and collection intervals, one prebuilt immutable manifest,
-synchronous validation, and atomic hit records. The “finalized” column includes
-the post-Cypress deterministic merge.
+| Mode | Wall + merge | Export / 30 GETs | Output |
+|---|---:|---:|---:|
+| Official PCOV 1.0.12 | 9.477 s | 5.621 s | 11.56 MB |
+| PCOV 2.1.1, cache off | 4.893 s | 0.251 s | 7.70 MB |
+| PCOV 2.1.1, cache on | 4.796 s | 0.199 s | 7.70 MB |
 
-| Mode | Cypress wall median / p95 | Finalized wall median / p95 | FPM CPU median / p95 | Request export median / p95 | Output median |
-|---|---:|---:|---:|---:|---:|
-| Official PCOV 1.0.12 | 316.245 / 317.229 s | 316.766 / 317.717 s | 208.433 / 210.015 s | 519.1 / 1090.6 ms | 59.34 MB |
-| Large-codebase PCOV 2.0 | 234.870 / 236.068 s | 236.125 / 237.366 s | 112.699 / 115.070 s | 1.85 / 2.95 ms | 3.10 MB |
-
-The fork reduced Cypress wall time by **25.7%**, finalized wall time by
-**25.5%**, FPM CPU by **45.9%**, pooled per-request export latency by **99.6%**,
-peak cgroup memory by **21.9%**, minor faults by **20.9%**, and request-record
-output by **94.8%**. Its final merge was slower (1.255 s median versus 0.489 s),
-and that cost is included in finalized wall time.
-
-All six accepted mode runs reconstructed exactly 208 files and 4,341
-executable lines with normalized SHA-256
-`6b1280edc9ecddd14657907a43b0cbed63bebb69dba81b280931c5c43d3c2903`.
-All 435 fork exports were validated hit-only matches; no fallback was accepted.
-With only three whole-scenario samples, the reported scenario p95 is the
-nearest-rank observed maximum, not a high-confidence tail estimate. Detailed
-application names, routes, and local infrastructure are intentionally omitted.
+The new cache reused 24/30 records per round, reducing export time by **20.7%**
+and wall + merge by **2.0%** versus 2.1.1 with the flag off. All nine rounds
+produced identical coverage: 1,434 files and 42,145 executable lines. These are
+workload-specific observations from three rounds, not a general speed guarantee.
+[Measurements](benchmark/measurements/2.1.1-magento.json) ·
+[Magento benchmark runner](benchmark/magento/run.py).
 
 ### Reproducible synthetic workload
 
-The public synthetic benchmark builds both extensions in the same PHP 8.5
-container. It generates 1,500 branch-heavy files, 64,500 executable lines, ten
-request-isolated slices, and ten interleaved rounds:
+PHP 8.5.11, 1,500 files, 64,500 executable lines, ten requests and ten rotating
+rounds. CLI requests do not use the Magento cache.
 
-| Mode | Total wall median / p95 | CPU median / p95 | Request export median / p95 | Output per round |
+| Mode | Wall median / p95 | CPU median / p95 | Export median | Output |
 |---|---:|---:|---:|---:|
-| Official PCOV 1.0.12 | 2.031 / 2.166 s | 1.992 / 2.148 s | 344.2 / 361.2 ms | 694,580 B |
-| Large-codebase PCOV 2.0 | 2.114 / 2.490 s | 2.006 / 2.339 s | 73.9 / 97.5 ms | 517,240 B |
+| Official PCOV 1.0.12 | 0.856 / 0.876 s | 0.849 / 0.869 s | 143.9 ms | 694,580 B |
+| PCOV 2.1.1 | 0.943 / 1.000 s | 0.895 / 0.951 s | 44.3 ms | 517,240 B |
 
-Here the fork reduced request export by **78.5%**, output by **25.5%**, and
-minor faults by **7.7%**, but the run was too short to amortize validation and
-the PHP finalizer: wall was **4.1% higher** and CPU **0.7% higher**. This is why
-the real multi-minute workload is the primary result.
-
-All synthetic rounds reconstructed the same 1,500 files and 64,500 lines with
-SHA-256
-`2bf06aab6b79a763167a9c5d05947f6876a0ab5d738f78de1dfe8885bdff3dea`.
-Reproduce that cohort with:
+Coverage matched in all 20 runs. Native export was faster and smaller, but
+finalized wall time was **10.2% higher** on this short workload.
+[Summary](benchmark/measurements/2.1.1-synthetic-summary.json) ·
+[Raw rounds](benchmark/measurements/2.1.1-synthetic.jsonl).
 
 ```sh
 benchmark/large-codebase/run.sh
+python3 benchmark/magento/run.py /path/to/visual-demo
 ```
-
-Raw JSONL is written under ignored `benchmark/results/`. Both results are
-workload-specific. Manifest generation is excluded from warm rows: the
-optimization pays off only when an immutable manifest is reused across enough
-requests, while code changes or uncertain validation synchronously fall back
-to complete discovery.
 
 ## Operational limits
 
@@ -276,43 +251,20 @@ to complete discovery.
 - This release supports Linux NTS only. Export is synchronous and all mutable
   coverage state remains process-local.
 
-## Optional Magento GET request cache
+## Native Magento GET coverage cache (2.1.1)
 
-`pcov.request_magento_cache=0` is **disabled by default**. Set it to `1` and use
-[MagentoRequestCache](tools/pcov_request_magento_cache.php) around your request:
+Enable native coverage reuse with:
 
-```php
-require '/path/to/pcov/tools/pcov_request_magento_cache.php';
-$cache = new pcov\MagentoRequestCache($recordsDir, $manifest, $deploymentId, $suiteId);
-$cache->start(); // Before Magento; the application always executes.
-register_shutdown_function(static function () use ($cache): void { $cache->finish(); });
+```ini
+pcov.request_magento_cache=1
 ```
 
-Repeated cacheable GETs reuse the first coverage record, keyed by URL, headers,
-`X-Magento-Vary`, store and deployment/suite. **Changed source fingerprints bypass
-cache**: every manifest source is SHA-256 checked, including unchanged size/mtime.
-Private/no-cache/no-store responses and checkout/admin/API routes bypass caching.
+Restart PHP and keep your existing `pcov\start()` / `stop()` / `export()`
+collector unchanged. No PHP cache helper or invalidation calls are needed.
+Every request still records and validates its actual hits; matching GETs reuse
+serialized coverage and write a normal record at the requested path. Magento's
+private/no-store response headers do not prevent this: HTTP responses are not
+cached. Requires a valid manifest and `pcov.large_codebase=1`.
 
-**Pros:** less recording/export CPU and storage. **Cons:** hashing adds I/O;
-hidden application-state changes can hide coverage. Call `$cache->invalidate()`
-after relevant state/cache resets. Use an existing writable records directory,
-a unique suite ID, and retain records until merging. Sources must stay immutable;
-new files require an updated deployment/manifest. The flag requires this helper.
-
-### Benchmark
-
-Real Magento 2.4.8-p5 / PHP 8.4.22, `app/code`, six routes × five repetitions;
-median of three rounds:
-
-| Experiment | Wall / 30 GETs | PHP CPU | Records |
-|---|---:|---:|---:|
-| Prototype: collect all | 20.823 s | 13.650 s | 30 |
-| Prototype: skip repeats | 17.676 s | 11.362 s | 6 |
-| Implemented option: off | 24.787 s | 17.486 s | 30 |
-| Implemented option: on | 22.825 s | 15.093 s | 30 |
-
-The prototype saved **15.1% wall, 16.8% CPU and 80% records**, without the new
-HTTP/fingerprint guards. The implemented option had **zero hits** because all
-routes returned `no-cache, no-store`; its timing difference is not a proven cache
-gain. Aggregate coverage matched, but a Magento cache reset added 115 covered
-lines to an identical GET: invalidation matters.
+The flag defaults to `0`. `export()` reports `cache: hit|miss|bypass` when enabled.
+See [cache details](docs/manifest-and-records.md#native-magento-export-cache-211).

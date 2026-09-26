@@ -6,6 +6,8 @@ namespace pcov;
 require_once __DIR__ . '/pcov_record_loader.php';
 
 /**
+ * Legacy 2.1.0 HTTP sampling adapter. PCOV 2.1.1 needs only the INI flag
+ * with the original start/stop/export collector; this helper is not required.
  * Optional HTTP collection adapter. Cached requests are coverage samples,
  * not proof that later execution would cover the same lines.
  *
@@ -136,7 +138,7 @@ final class MagentoRequestCache
                 $this->cacheStatus = 'cache-error';
             }
         }
-        return $this->result = $result + ['record' => $this->record, 'cache' => $this->cacheStatus];
+        return $this->result = array_merge($result, ['record' => $this->record, 'cache' => $this->cacheStatus]);
     }
 
     /** Invalidate this suite across workers, including exports still in flight. */

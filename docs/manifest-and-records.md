@@ -101,3 +101,39 @@ records are never interpreted against N+1.
 The safety boundary is deployment orchestration: PCOV validates the supplied
 identities and file contents, but cannot prove that caller-provided deployment
 digests or an external inventory are authoritative.
+
+## Native Magento export cache (2.1.1)
+
+`pcov.request_magento_cache=1` enables a native worker-local cache inside the
+existing `pcov\export()` API. No helper, new API call, or binary format change is
+needed. Every request executes, records actual hits and passes normal validation.
+Only exact matches of selected files, fingerprints, deployment/manifest identities
+and sorted line hits reuse a serialized record. Changes to application state,
+filters or `clear()` cannot resurrect old hits or conceal newly executed lines.
+
+Eligibility requires a successful HTTP GET and a validated manifest. Full,
+fallback and CLI exports bypass the cache. Unlike the 2.1.0 sampling helper,
+HTTP private/no-cache/no-store policy does not prohibit native coverage reuse:
+no response is cached and recording is never skipped. Responses and cookies
+are still produced normally. The URI, request headers/cookies, scheme/port,
+coverage scope and canonical output directory partition entries; use a fresh
+output directory per suite. Header order changes may cause a harmless miss.
+
+Each worker retains at most 16 entries of 512 KiB each (8 MiB of key/record
+bytes), for at most 300 seconds. Entries contain process-owned native bytes,
+never request-allocated Zend pointers. Workers warm independently. Mutating
+requests evict their worker's entries, but cross-worker invalidation is not
+required because current coverage is compared before every reuse. Oversized
+records are exported normally and not retained.
+
+Hits skip native record serialization/checksum construction and use the same
+atomic writer at the caller's requested path. Publication failure returns false
+and keeps current coverage retryable. `export()` adds `cache` with `hit`, `miss`
+or `bypass` when the flag is enabled; existing `mode` values remain unchanged.
+`export_stats()` adds `request_cache_hit` and `request_cache_ns`. Recording,
+validation and publication costs remain; measure benefits on the actual workload.
+
+To migrate, remove legacy `MagentoRequestCache` wrappers and invalidation calls,
+restore `start()`/`stop()`/`export()`, keep the flag enabled, and regenerate the
+manifest after upgrading PCOV. The old helper remains for compatibility; its
+sampling behavior and explicit invalidation rules are unchanged.

@@ -443,6 +443,7 @@ PHP_MSHUTDOWN_FUNCTION(pcov)
 		zend_execute_ex   = zend_execute_ex_function;
 	}
 
+	php_pcov_dump_mshutdown();
 	UNREGISTER_INI_ENTRIES();
 
 	return SUCCESS;

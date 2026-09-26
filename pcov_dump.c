@@ -1323,6 +1323,8 @@ static zend_bool php_pcov_dump_export(
 	return success;
 } /* }}} */
 
+#include "pcov_request_cache.h"
+
 static zend_bool php_pcov_dump_export_validated(
 		zend_string *path,
 		zend_string *manifest_path,
@@ -1345,6 +1347,8 @@ static zend_bool php_pcov_dump_export_validated(
 	zend_bool benchmark = php_pcov_dump_benchmark_enabled();
 	uint64_t started = php_pcov_dump_now();
 	smart_str serialized = {0};
+	zend_string *cache_context = NULL;
+	unsigned int cache_ttl = 300;
 
 	memset(&manifest, 0, sizeof(manifest));
 	memset(manifest_id, 0, PHP_PCOV_FINGERPRINT_SIZE);
@@ -1411,9 +1415,21 @@ static zend_bool php_pcov_dump_export_validated(
 
 	if (matched) {
 		started = php_pcov_dump_now();
-		success = php_pcov_dump_serialize_validated_hits(
-			files, file_count, hits, hit_count, environment_id,
-			manifest.manifest_id, &serialized, stats, benchmark, &error);
+		if (PCG(ini.request_magento_cache)) {
+			cache_context = php_pcov_request_cache_context(path);
+			if (cache_context) {
+				serialized.s = php_pcov_request_cache_lookup(cache_context,
+					files, file_count, hits, hit_count, environment_id, manifest.manifest_id, stats);
+				stats->request_cache_status = serialized.s ? 2 : 1;
+			}
+			stats->request_cache_ns = php_pcov_dump_now() - started;
+		}
+		success = serialized.s != NULL;
+		if (!success) {
+			success = php_pcov_dump_serialize_validated_hits(
+				files, file_count, hits, hit_count, environment_id,
+				manifest.manifest_id, &serialized, stats, benchmark, &error);
+		}
 		stats->serialize_ns = php_pcov_dump_now() - started;
 	} else {
 		zval coverage;
@@ -1437,10 +1453,17 @@ cleanup:
 	if (!success) {
 		stats->error = error;
 		stats->phase = PCOV_DUMP_PHASE_SERIALIZE;
+		if (cache_context) zend_string_release(cache_context);
 		smart_str_free(&serialized);
 		return 0;
 	}
 	success = php_pcov_dump_publish(path, serialized.s, sequence, stats);
+	if (cache_context) {
+		if (success && stats->request_cache_status == 1) {
+			php_pcov_request_cache_store(cache_context, serialized.s, cache_ttl, stats);
+		}
+		zend_string_release(cache_context);
+	}
 	smart_str_free(&serialized);
 	return success;
 } /* }}} */
@@ -1484,7 +1507,23 @@ PHP_PCOV_API zend_bool php_pcov_dump_benchmark_enabled(void) { /* {{{ */
 } /* }}} */
 #endif
 
+PHP_PCOV_API void php_pcov_dump_mshutdown(void) {
+#ifdef HAVE_PCOV_NATIVE_EXPORT
+	php_pcov_request_cache_clear();
+#endif
+}
+
 PHP_PCOV_API void php_pcov_dump_rinit(void) { /* {{{ */
+#ifdef HAVE_PCOV_NATIVE_EXPORT
+	/* Best-effort eviction on writes; correctness never depends on eviction:
+	 * other workers still compare their current files and actual line hits. */
+	if (PCG(ini.request_magento_cache) && SG(request_info).request_method &&
+	    strcmp(SG(request_info).request_method, "GET") &&
+	    strcmp(SG(request_info).request_method, "HEAD") &&
+	    strcmp(SG(request_info).request_method, "OPTIONS")) {
+		php_pcov_request_cache_clear();
+	}
+#endif
 	memset(&PCG(dump_stats), 0, sizeof(PCG(dump_stats)));
 	PCG(dump_sequence) = 0;
 } /* }}} */
@@ -1572,6 +1611,10 @@ PHP_NAMED_FUNCTION(php_pcov_export) { /* {{{ */
 			add_assoc_string(return_value, "mode", "full");
 			add_assoc_string(return_value, "reason", "explicit-full");
 		}
+		if (PCG(ini.request_magento_cache)) {
+			add_assoc_string(return_value, "cache", PCG(dump_stats).request_cache_status == 2 ?
+				"hit" : (PCG(dump_stats).request_cache_status == 1 ? "miss" : "bypass"));
+		}
 		id_hex = php_pcov_dump_id_hex(manifest_id);
 		add_assoc_str(return_value, "manifest_id", id_hex);
 		add_assoc_long(return_value, "validation_files",
@@ -1604,6 +1647,8 @@ PHP_NAMED_FUNCTION(php_pcov_export_stats) { /* {{{ */
 		return;
 	}
 
+	add_assoc_long(return_value, "request_cache_ns", (zend_long) PCG(dump_stats).request_cache_ns);
+	add_assoc_bool(return_value, "request_cache_hit", PCG(dump_stats).request_cache_status == 2);
 	add_assoc_long(return_value, "collect_ns", (zend_long) PCG(dump_stats).collect_ns);
 	add_assoc_long(return_value, "range_filter_ns", (zend_long) PCG(dump_stats).range_filter_ns);
 	add_assoc_long(return_value, "hit_traversal_ns", (zend_long) PCG(dump_stats).hit_traversal_ns);

@@ -5,8 +5,11 @@ from pathlib import Path
 from collections import Counter
 parser=argparse.ArgumentParser(description='Compare official PCOV and native Magento GET export caching in the visual demo.')
 parser.add_argument('demo_directory', type=Path)
-parser.add_argument('--output', type=Path, default=Path(__file__).resolve().parents[1]/'results/magento-2.1.1.json')
+parser.add_argument('--output', type=Path, default=Path(__file__).resolve().parents[1]/'results/magento-2.1.2.json')
+parser.add_argument('--repetitions', type=int, default=15, help='GET repetitions per route and round')
 args=parser.parse_args()
+if args.repetitions < 1: parser.error('--repetitions must be positive')
+request_count=2*args.repetitions
 ROOT=args.demo_directory.resolve()
 args.output.parent.mkdir(parents=True, exist_ok=True)
 SERVICE='magento-vitaliy'
@@ -19,14 +22,16 @@ ini='/usr/local/etc/php/conf.d/zz-pcov-vitaliy.ini'
 original=app('cat',ini)
 for variant in ['official','vitaliy']:
     compose('exec','-T','magento-'+variant,'sh','-c','test ! -e /coverage/active')
+runtime={variant: json.loads(compose('exec','-T','magento-'+variant,'php','-r',
+    'echo json_encode(["php"=>PHP_VERSION,"pcov"=>phpversion("pcov")]);')) for variant in ['official','vitaliy']}
 results=[]
 def warm():
     for _ in range(5):
         for route in ['/', '/demo-backpack.html']:
-            app('curl','-fsS','-b','/tmp/pcov211-cookies','-c','/tmp/pcov211-cookies','-o','/dev/null','http://magento'+route)
+            app('curl','-fsS','-b','/tmp/pcov212-cookies','-c','/tmp/pcov212-cookies','-o','/dev/null','http://magento'+route)
 try:
     warm()
-    reference='pcov211-benchmark-reference-'+str(int(time.time()))
+    reference='pcov212-benchmark-reference-'+str(int(time.time()))
     app('php','/opt/demo/coverage-control.php','start',reference)
     app('php','-r', '$p="/coverage/raw/".$argv[1]."/collector.json"; $i=json_decode(file_get_contents($p),true); $i["manifest"]=null; file_put_contents($p,json_encode($i));',reference)
     warm()
@@ -51,18 +56,18 @@ $p="/coverage/manifests/".$argv[1].".pcov"; pcov_manifest_create_from_coverage($
         else: raise RuntimeError('Magento did not restart')
         for _ in range(5):
             for route in ['/', '/demo-backpack.html']:
-                app('curl','-fsS','-b','/tmp/pcov211-cookies','-c','/tmp/pcov211-cookies','-o','/dev/null','http://magento'+route)
-        run=f'pcov211-ab-{int(time.time())}-{iteration}-{mode}'
+                app('curl','-fsS','-b','/tmp/pcov212-cookies','-c','/tmp/pcov212-cookies','-o','/dev/null','http://magento'+route)
+        run=f'pcov212-ab-{int(time.time())}-{iteration}-{mode}'
         app('php','/opt/demo/coverage-control.php','start',run)
         if variant=='vitaliy':
             app('php','-r','$p="/coverage/raw/".$argv[1]."/collector.json"; $i=json_decode(file_get_contents($p),true); $i["manifest"]=$argv[2]; file_put_contents($p,json_encode($i));',run,manifest)
         # Measure entirely in the container, excluding host Docker-exec overhead.
-        output=app('sh','-c', '''i=0; while [ "$i" -lt 15 ]; do
+        output=app('sh','-c', '''i=0; while [ "$i" -lt "$1" ]; do
 for route in / /demo-backpack.html; do
-curl -fsS -b /tmp/pcov211-cookies -c /tmp/pcov211-cookies -o /dev/null -w '%{time_total}\n' "http://magento$route" || exit 1
+curl -fsS -b /tmp/pcov212-cookies -c /tmp/pcov212-cookies -o /dev/null -w '%{time_total}\n' "http://magento$route" || exit 1
 done
 i=$((i+1))
-done''')
+done''', 'pcov-benchmark', str(args.repetitions))
         app('php','/opt/demo/coverage-control.php','stop')
         verification=json.loads(app('php','-r', '''require "/opt/pcov-tools/pcov_manifest_tools.php";
 $dir="/coverage/raw/".$argv[1];
@@ -80,10 +85,10 @@ foreach(json_decode(file_get_contents($p),true) as $file=>$lines) {foreach($line
 echo json_encode(["coverageHash"=>pcov_coverage_hash($coverage),"files"=>count($coverage),"executableLines"=>array_sum(array_map("count",$coverage)),"mergeSeconds"=>(hrtime(true)-$mergeStart)/1e9]);''',run))
         folder=ROOT/'coverage'/variant/'raw'/run
         metadata=[json.loads(p.read_text()) for p in folder.glob('*.meta')]
-        assert len(metadata)==30, 'Expected exactly 30 request records'
+        assert len(metadata)==request_count, f'Expected exactly {request_count} request records'
         assert verification['files']>0, 'Coverage must not be empty'
         exports=[m['exportSeconds'] for m in metadata]
-        row={'iteration':iteration,'variant':variant,'mode':mode,'flag':flag,'run':run,'wallSeconds':sum(map(float,output.splitlines())),
+        row={**runtime[variant],'iteration':iteration,'variant':variant,'mode':mode,'flag':flag,'run':run,'wallSeconds':sum(map(float,output.splitlines())),
              'exportSeconds':sum(exports),'exportMedianMs':1000*statistics.median(exports),
              'cache':dict(Counter(m['export'].get('cache','disabled') for m in metadata)),
              'modes':dict(Counter(m['export']['mode'] for m in metadata)),**verification}
@@ -93,7 +98,7 @@ echo json_encode(["coverageHash"=>pcov_coverage_hash($coverage),"files"=>count($
         print(json.dumps(row),flush=True)
         args.output.write_text(json.dumps(results,indent=2))
     assert len({row['coverageHash'] for row in results})==1, 'Coverage differs between modes'
-    assert all(row['modes']==({'upstream-full':30} if row['variant']=='official' else {'hit-only':30}) for row in results)
+    assert all(row['modes']==({'upstream-full':request_count} if row['variant']=='official' else {'hit-only':request_count}) for row in results)
 finally:
     for variant in ['official','vitaliy']:
         SERVICE='magento-'+variant

@@ -105,7 +105,7 @@ The safety boundary is deployment orchestration: PCOV validates the supplied
 identities and file contents, but cannot prove that caller-provided deployment
 digests or an external inventory are authoritative.
 
-## Native Magento export cache (2.1.1)
+## Native Magento export cache (2.1.2)
 
 `pcov.request_magento_cache=1` enables a native worker-local cache inside the
 existing `pcov\export()` API. No helper, new API call, or binary format change is

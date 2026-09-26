@@ -1,0 +1,84 @@
+{
+    "environment": {
+        "php": "8.5.11",
+        "kernel": "Linux 7.0.0-34-generic #34-Ubuntu SMP PREEMPT_DYNAMIC Wed Sep  2 14:29:37 UTC 2026 x86_64",
+        "files": 1500,
+        "statements_per_file": 40,
+        "files_per_request": 150,
+        "requests_per_round": 10,
+        "rounds": 10,
+        "cold_manifest_ns": 1029373453,
+        "cold_manifest_cpu_us": 883772,
+        "cold_manifest_max_rss_kb": 58340,
+        "manifest_bytes": 417120
+    },
+    "coverage_hash": "271515eff8613615fecc92b526f0c4dbe6b7d764f6bfdaad4d5cf032e8c93e3b",
+    "modes": {
+        "official": {
+            "wall_ns": {
+                "median": 855618781,
+                "p95": 873038348
+            },
+            "cpu_us": {
+                "median": 855330,
+                "p95": 872715
+            },
+            "export_ns": {
+                "median": 144301230,
+                "p95": 153281851
+            },
+            "merge_ns": {
+                "median": 6694571,
+                "p95": 7118579
+            },
+            "output_bytes": {
+                "median": 694580,
+                "p95": 694580
+            },
+            "max_rss_kb": {
+                "median": 58280,
+                "p95": 58416
+            },
+            "minor_faults": {
+                "median": 89137,
+                "p95": 89141
+            },
+            "files": 1500,
+            "executable_lines": 64500,
+            "pcov": "1.0.12"
+        },
+        "large-codebase": {
+            "wall_ns": {
+                "median": 780896936,
+                "p95": 790498569
+            },
+            "cpu_us": {
+                "median": 780606,
+                "p95": 790002
+            },
+            "export_ns": {
+                "median": 11678712,
+                "p95": 12096205
+            },
+            "merge_ns": {
+                "median": 26519389,
+                "p95": 27992363
+            },
+            "output_bytes": {
+                "median": 517240,
+                "p95": 517240
+            },
+            "max_rss_kb": {
+                "median": 57624,
+                "p95": 57716
+            },
+            "minor_faults": {
+                "median": 82246,
+                "p95": 82248
+            },
+            "files": 1500,
+            "executable_lines": 64500,
+            "pcov": "2.1.2"
+        }
+    }
+}

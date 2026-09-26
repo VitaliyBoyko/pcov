@@ -21,7 +21,7 @@
 extern zend_module_entry pcov_module_entry;
 #define phpext_pcov_ptr &pcov_module_entry
 
-#define PHP_PCOV_VERSION "2.1.1"
+#define PHP_PCOV_VERSION "2.1.2"
 
 #ifdef PHP_WIN32
 #	define PHP_PCOV_API __declspec(dllexport)

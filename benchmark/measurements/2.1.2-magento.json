@@ -1,0 +1,221 @@
+[
+  {
+    "php": "8.3.31",
+    "pcov": "1.0.12",
+    "iteration": 0,
+    "variant": "official",
+    "mode": "official",
+    "flag": 0,
+    "run": "pcov212-ab-1790408978-0-official",
+    "wallSeconds": 29.395548,
+    "exportSeconds": 17.34657430648799,
+    "exportMedianMs": 172.104477882385,
+    "cache": {
+      "disabled": 100
+    },
+    "modes": {
+      "upstream-full": 100
+    },
+    "coverageHash": "f90944ca1f7ae5f35cc310a1921a5698a7790127324f259155078b7a633d631b",
+    "files": 1434,
+    "executableLines": 42145,
+    "mergeSeconds": 0.497939038,
+    "finalizedSeconds": 29.893487038,
+    "outputBytes": 38526300
+  },
+  {
+    "php": "8.3.31",
+    "pcov": "2.1.2",
+    "iteration": 1,
+    "variant": "vitaliy",
+    "mode": "off",
+    "flag": 0,
+    "run": "pcov212-ab-1790409013-1-off",
+    "wallSeconds": 14.058618,
+    "exportSeconds": 0.4199986457824708,
+    "exportMedianMs": 4.2459964752197,
+    "cache": {
+      "disabled": 100
+    },
+    "modes": {
+      "hit-only": 100
+    },
+    "coverageHash": "f90944ca1f7ae5f35cc310a1921a5698a7790127324f259155078b7a633d631b",
+    "files": 1434,
+    "executableLines": 42145,
+    "mergeSeconds": 0.598363682,
+    "finalizedSeconds": 14.656981682,
+    "outputBytes": 25664300
+  },
+  {
+    "php": "8.3.31",
+    "pcov": "2.1.2",
+    "iteration": 2,
+    "variant": "vitaliy",
+    "mode": "on",
+    "flag": 1,
+    "run": "pcov212-ab-1790409033-2-on",
+    "wallSeconds": 14.109855,
+    "exportSeconds": 0.3786139488220222,
+    "exportMedianMs": 3.9089918136597,
+    "cache": {
+      "hit": 94,
+      "miss": 6
+    },
+    "modes": {
+      "hit-only": 100
+    },
+    "coverageHash": "f90944ca1f7ae5f35cc310a1921a5698a7790127324f259155078b7a633d631b",
+    "files": 1434,
+    "executableLines": 42145,
+    "mergeSeconds": 0.598691125,
+    "finalizedSeconds": 14.708546125,
+    "outputBytes": 25664300
+  },
+  {
+    "php": "8.3.31",
+    "pcov": "2.1.2",
+    "iteration": 3,
+    "variant": "vitaliy",
+    "mode": "on",
+    "flag": 1,
+    "run": "pcov212-ab-1790409053-3-on",
+    "wallSeconds": 14.107719,
+    "exportSeconds": 0.3802871704101563,
+    "exportMedianMs": 3.83055210113525,
+    "cache": {
+      "hit": 94,
+      "miss": 6
+    },
+    "modes": {
+      "hit-only": 100
+    },
+    "coverageHash": "f90944ca1f7ae5f35cc310a1921a5698a7790127324f259155078b7a633d631b",
+    "files": 1434,
+    "executableLines": 42145,
+    "mergeSeconds": 0.604064202,
+    "finalizedSeconds": 14.711783202,
+    "outputBytes": 25664300
+  },
+  {
+    "php": "8.3.31",
+    "pcov": "1.0.12",
+    "iteration": 4,
+    "variant": "official",
+    "mode": "official",
+    "flag": 0,
+    "run": "pcov212-ab-1790409073-4-official",
+    "wallSeconds": 29.280917,
+    "exportSeconds": 17.27953314781192,
+    "exportMedianMs": 183.155536651615,
+    "cache": {
+      "disabled": 100
+    },
+    "modes": {
+      "upstream-full": 100
+    },
+    "coverageHash": "f90944ca1f7ae5f35cc310a1921a5698a7790127324f259155078b7a633d631b",
+    "files": 1434,
+    "executableLines": 42145,
+    "mergeSeconds": 0.491755133,
+    "finalizedSeconds": 29.772672133,
+    "outputBytes": 38526300
+  },
+  {
+    "php": "8.3.31",
+    "pcov": "2.1.2",
+    "iteration": 5,
+    "variant": "vitaliy",
+    "mode": "off",
+    "flag": 0,
+    "run": "pcov212-ab-1790409108-5-off",
+    "wallSeconds": 14.256676,
+    "exportSeconds": 0.4198219776153566,
+    "exportMedianMs": 4.2638778686523,
+    "cache": {
+      "disabled": 100
+    },
+    "modes": {
+      "hit-only": 100
+    },
+    "coverageHash": "f90944ca1f7ae5f35cc310a1921a5698a7790127324f259155078b7a633d631b",
+    "files": 1434,
+    "executableLines": 42145,
+    "mergeSeconds": 0.600146056,
+    "finalizedSeconds": 14.856822056,
+    "outputBytes": 25664300
+  },
+  {
+    "php": "8.3.31",
+    "pcov": "2.1.2",
+    "iteration": 6,
+    "variant": "vitaliy",
+    "mode": "off",
+    "flag": 0,
+    "run": "pcov212-ab-1790409128-6-off",
+    "wallSeconds": 14.666149,
+    "exportSeconds": 0.4268233776092528,
+    "exportMedianMs": 4.4580698013305495,
+    "cache": {
+      "disabled": 100
+    },
+    "modes": {
+      "hit-only": 100
+    },
+    "coverageHash": "f90944ca1f7ae5f35cc310a1921a5698a7790127324f259155078b7a633d631b",
+    "files": 1434,
+    "executableLines": 42145,
+    "mergeSeconds": 0.619816422,
+    "finalizedSeconds": 15.285965422,
+    "outputBytes": 25664300
+  },
+  {
+    "php": "8.3.31",
+    "pcov": "2.1.2",
+    "iteration": 7,
+    "variant": "vitaliy",
+    "mode": "on",
+    "flag": 1,
+    "run": "pcov212-ab-1790409149-7-on",
+    "wallSeconds": 14.279992,
+    "exportSeconds": 0.3848259449005126,
+    "exportMedianMs": 3.97396087646485,
+    "cache": {
+      "hit": 94,
+      "miss": 6
+    },
+    "modes": {
+      "hit-only": 100
+    },
+    "coverageHash": "f90944ca1f7ae5f35cc310a1921a5698a7790127324f259155078b7a633d631b",
+    "files": 1434,
+    "executableLines": 42145,
+    "mergeSeconds": 0.603064863,
+    "finalizedSeconds": 14.883056863,
+    "outputBytes": 25664300
+  },
+  {
+    "php": "8.3.31",
+    "pcov": "1.0.12",
+    "iteration": 8,
+    "variant": "official",
+    "mode": "official",
+    "flag": 0,
+    "run": "pcov212-ab-1790409169-8-official",
+    "wallSeconds": 29.845865,
+    "exportSeconds": 17.65233540534972,
+    "exportMedianMs": 179.98147010803,
+    "cache": {
+      "disabled": 100
+    },
+    "modes": {
+      "upstream-full": 100
+    },
+    "coverageHash": "f90944ca1f7ae5f35cc310a1921a5698a7790127324f259155078b7a633d631b",
+    "files": 1434,
+    "executableLines": 42145,
+    "mergeSeconds": 0.494040689,
+    "finalizedSeconds": 30.339905689,
+    "outputBytes": 38526300
+  }
+]

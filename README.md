@@ -28,7 +28,7 @@ across an entire suite, not for a standalone request report.
 
 ## Requirements and installation
 
-Release 2.1.1 supports Linux, NTS PHP 8.3, 8.4, and 8.5. It uses the extension
+Release 2.1.2 supports Linux, NTS PHP 8.3, 8.4, and 8.5. It uses the extension
 name `pcov`, so it replaces and cannot be loaded beside official PCOV.
 
 Install with [PIE](https://github.com/php/pie), the PHP extension installer:
@@ -193,24 +193,24 @@ Coverage records use a fixed-width, big-endian, checksummed format (version 1)
 with strict bounds checking. Records are intentionally tied to an exact
 `PHP_VERSION_ID`; regenerate manifests when changing PHP or PCOV versions.
 
-## Benchmarks — 2.1.1
+## Benchmarks — 2.1.2
 
 ### Magento
 
-Magento 2.4.8 / PHP 8.3.31, 30 GETs across two routes; median of three rotating
+Magento 2.4.8 / PHP 8.3.31, 100 GETs across two routes; median of three rotating
 rounds. Total time includes requests and coverage merge; export is part of it.
 
 | Extension / setting | Total time | Export time | Output |
 |---|---:|---:|---:|
-| Official PCOV 1.0.12 | 9.113 s | 5.302 s | 11.56 MB |
-| PCOV 2.1.1, cache off | 4.553 s | 0.131 s | 7.70 MB |
-| PCOV 2.1.1, cache on | 4.473 s | 0.120 s | 7.70 MB |
+| Official PCOV 1.0.12 | 29.893 s | 17.347 s | 38.53 MB |
+| PCOV 2.1.2, cache off | 14.857 s | 0.420 s | 25.66 MB |
+| PCOV 2.1.2, cache on | 14.712 s | 0.380 s | 25.66 MB |
 
-**2.1.1 with cache on reduced total time by 50.9% versus official PCOV.**
-Compared with the same 2.1.1 build with cache off, enabling the cache reduced
-export time by 8.7% and total time by 1.7%, reusing 24/30 records per round.
+**2.1.2 with cache on reduced total time by 50.8% versus official PCOV.**
+Compared with the same 2.1.2 build with cache off, enabling the cache reduced
+export time by 9.5% and total time by 1.0%, reusing 94/100 records per round.
 All nine rounds produced identical coverage: 1,434 files and 42,145 executable
-lines. [Measurements](benchmark/measurements/2.1.1-magento.json).
+lines. [Measurements](benchmark/measurements/2.1.2-magento.json).
 
 ### Synthetic CLI
 
@@ -219,19 +219,19 @@ rotating rounds. The GET cache is inactive in CLI. Total time and CPU include me
 
 | Extension | Total median / p95 | CPU median / p95 | Export median | Output |
 |---|---:|---:|---:|---:|
-| Official PCOV 1.0.12 | 0.854 / 0.886 s | 0.854 / 0.885 s | 142.8 ms | 694,580 B |
-| PCOV 2.1.1 | 0.775 / 0.806 s | 0.775 / 0.805 s | 11.9 ms | 517,240 B |
+| Official PCOV 1.0.12 | 0.856 / 0.873 s | 0.855 / 0.873 s | 144.3 ms | 694,580 B |
+| PCOV 2.1.2 | 0.781 / 0.790 s | 0.781 / 0.790 s | 11.7 ms | 517,240 B |
 
-**2.1.1 reduced total time by 9.2% and export time by 91.7% versus official PCOV.**
-Coverage matched in all 20 runs. [Summary](benchmark/measurements/2.1.1-synthetic-summary.json)
-· [Raw rounds](benchmark/measurements/2.1.1-synthetic.jsonl).
+**2.1.2 reduced total time by 8.7% and export time by 91.9% versus official PCOV.**
+Coverage matched in all 20 runs. [Summary](benchmark/measurements/2.1.2-synthetic-summary.json)
+· [Raw rounds](benchmark/measurements/2.1.2-synthetic.jsonl).
 
-PCOV 2.1.1 uses an existing manifest in both benchmarks; initial manifest
+PCOV 2.1.2 uses an existing manifest in both benchmarks; initial manifest
 bootstrap is excluded.
 
 ```sh
 benchmark/large-codebase/run.sh
-python3 benchmark/magento/run.py /path/to/visual-demo
+python3 benchmark/magento/run.py /path/to/visual-demo --repetitions=50
 ```
 
 ## Operational limits
@@ -251,7 +251,7 @@ python3 benchmark/magento/run.py /path/to/visual-demo
 - This release supports Linux NTS only. Export is synchronous and all mutable
   coverage state remains process-local.
 
-## Native Magento GET coverage cache (2.1.1)
+## Native Magento GET coverage cache (2.1.2)
 
 Adds native GET coverage reuse and optimizes source hashing, checksums, and merging.
 Enable the cache with:
@@ -268,4 +268,4 @@ private/no-store response headers do not prevent this: HTTP responses are not
 cached. Requires a valid manifest and `pcov.large_codebase=1`.
 
 The flag defaults to `0`. `export()` reports `cache: hit|miss|bypass` when enabled.
-See [cache details](docs/manifest-and-records.md#native-magento-export-cache-211).
+See [cache details](docs/manifest-and-records.md#native-magento-export-cache-212).

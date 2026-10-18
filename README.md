@@ -291,3 +291,7 @@ No. Export is synchronous and process-local. Manifest validation can reduce repe
 [MageLens](https://github.com/VitaliyBoyko/MageLens) uses this fork for PHP coverage from Cypress or Playwright HTTP requests and combines it with JavaScript and [template coverage](https://github.com/VitaliyBoyko/magento-template-coverage). The [benchmark data](benchmark/measurements/) records specific test environments; it is not a performance guarantee for other workloads.
 
 Report fork-specific problems in [this repository's issues](https://github.com/VitaliyBoyko/pcov/issues), including PHP version, SAPI, extension settings and export mode. Published versions are listed under [releases](https://github.com/VitaliyBoyko/pcov/releases).
+
+## Repository navigation for AI agents
+
+See [AGENTS.md](AGENTS.md) for the architecture map, source entry points, validation commands and contribution constraints.

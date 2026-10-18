@@ -2,8 +2,8 @@
     "name": "vitaliyboyko/pcov",
     "type": "php-ext",
     "license": "PHP-3.01",
-    "description": "PCOV coverage driver optimized for large PHP test suites",
-    "keywords": ["coverage", "phpunit", "pcov", "testing"],
+    "description": "PCOV fork for PHP line coverage with synchronous native export and executable-line manifest reuse for large test suites",
+    "keywords": ["php", "pcov", "code-coverage", "phpunit", "testing", "php-extension", "magento2"],
     "homepage": "https://github.com/VitaliyBoyko/pcov",
     "support": {
         "issues": "https://github.com/VitaliyBoyko/pcov/issues",

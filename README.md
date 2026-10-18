@@ -1,4 +1,4 @@
-# PCOV for large PHP codebases
+# PCOV fork: PHP code coverage for large test suites
 
 This is an alternative distribution of [PCOV](https://github.com/krakjoe/pcov)
 for aggregate coverage of large PHP test suites. It keeps PCOV's fast opcode
@@ -86,7 +86,7 @@ The identity must change when application code, dependencies, enabled modules,
 generated code, or the relevant source inventory changes:
 
 ```sh
-DEPLOYMENT_ID=$(php -r '
+export DEPLOYMENT_ID=$(php -r '
 require "tools/pcov_manifest_tools.php";
 echo pcov_manifest_environment_identity([
     "application_revision" => "release-2026-08-30",
@@ -99,7 +99,9 @@ echo pcov_manifest_environment_identity([
 ```
 
 Use authoritative build inputs in place of the generic strings. Timestamps
-alone are not a deployment identity.
+alone are not a deployment identity. The exported variable reaches child CLI processes;
+for PHP-FPM, explicitly pass the same identity through your coverage collector or
+configure it in the worker environment. A shell export does not update running FPM workers.
 
 ### 2. Generate an immutable manifest
 
@@ -269,3 +271,23 @@ cached. Requires a valid manifest and `pcov.large_codebase=1`.
 
 The flag defaults to `0`. `export()` reports `cache: hit|miss|bypass` when enabled.
 See [cache details](docs/manifest-and-records.md#native-magento-export-cache-212).
+
+## FAQ
+
+### Is this the upstream PCOV package?
+
+No. This is `vitaliyboyko/pcov`, an alternative distribution of [krakjoe/pcov](https://github.com/krakjoe/pcov). It uses the same extension name and preserves the upstream collection API. Install one distribution at a time; use a dedicated coverage SAPI without Xdebug or phpdbg coverage hooks.
+
+### Does the manifest workflow run automatically in PHPUnit?
+
+The upstream-compatible `pcov\collect()` API remains available to coverage consumers. The added manifest workflow requires a collector that calls `pcov\export()` and merges its records with the supplied tools. Installing this fork alone does not wire those steps into a test runner.
+
+### Is request export asynchronous?
+
+No. Export is synchronous and process-local. Manifest validation can reduce repeated discovery work; uncertain validity produces full fallback records. See the [architecture guide](docs/manifest-and-records.md) for the exact contract.
+
+### Where can I see a Magento integration?
+
+[MageLens](https://github.com/VitaliyBoyko/MageLens) uses this fork for PHP coverage from Cypress or Playwright HTTP requests and combines it with JavaScript and [template coverage](https://github.com/VitaliyBoyko/magento-template-coverage). The [benchmark data](benchmark/measurements/) records specific test environments; it is not a performance guarantee for other workloads.
+
+Report fork-specific problems in [this repository's issues](https://github.com/VitaliyBoyko/pcov/issues), including PHP version, SAPI, extension settings and export mode. Published versions are listed under [releases](https://github.com/VitaliyBoyko/pcov/releases).

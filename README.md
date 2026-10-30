@@ -292,6 +292,10 @@ No. Export is synchronous and process-local. Manifest validation can reduce repe
 
 Report fork-specific problems in [this repository's issues](https://github.com/VitaliyBoyko/pcov/issues), including PHP version, SAPI, extension settings and export mode. Published versions are listed under [releases](https://github.com/VitaliyBoyko/pcov/releases).
 
+## License
+
+This fork, including its additions, is licensed under the upstream [PHP License 3.01](LICENSE). Commercial use, modification and redistribution are permitted under its terms, with the required notices and acknowledgments preserved.
+
 ## Repository navigation for AI agents
 
 See [AGENTS.md](AGENTS.md) for the architecture map, source entry points, validation commands and contribution constraints.
